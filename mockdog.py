@@ -36,20 +36,22 @@ def bind_udp(ip=None, port=None):
     return sock
 
 
-def process(msg):
-    m = msg_format.match(msg)
-    if not m:
-        logger.info("dogstatsd message: `Regex Error` {}".format(msg))
-    else:
-        event_name = m.group('name')
-        if event_name in single_events:
-            if event_name not in processed_events:
-                processed_events[event_name] = dict(
-                    value=m.group('value'),
-                    type=m.group('type'),
-                    tags=m.group('tags'),
-                )
-        logger.info("dogstatsd message: {}".format(msg))
+def process(pkt):
+    for msg in pkt.split('\n'):
+        if msg:
+            m = msg_format.match(msg)
+            if not m:
+                logger.info("dogstatsd message: `Regex Error` {}".format(msg))
+            else:
+                event_name = m.group('name')
+                if event_name in single_events:
+                    if event_name not in processed_events:
+                        processed_events[event_name] = dict(
+                            value=m.group('value'),
+                            type=m.group('type'),
+                            tags=m.group('tags'),
+                        )
+                logger.info("dogstatsd message: {}".format(msg))
 
 if __name__ == "__main__":
     sock = bind_udp()
