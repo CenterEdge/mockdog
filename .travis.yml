@@ -1,0 +1,12 @@
+sudo: required
+language: python
+services:
+- docker
+script:
+- docker build -t centeredge/mockdog:${TRAVIS_BUILD_NUMBER} .
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: scripts/docker_push.sh
+  on:
+    tags: true
